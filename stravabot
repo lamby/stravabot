@@ -59,7 +59,6 @@ class LogBot(irc.IRCClient):
         self.join(self.factory.channel)
 
         self.factory.club.callback = self.new_activity
-        self.factory.club.start()
 
     def new_activity(self, activity):
         athlete = '%(firstname)s %(lastname)s' % activity['athlete']
@@ -77,6 +76,7 @@ class LogBotFactory(protocol.ClientFactory):
         self.nickname = nickname
 
         self.club = StravaClub(club_id, access_token, update_interval)
+        self.club.start()
 
     def buildProtocol(self, addr):
         p = LogBot()
