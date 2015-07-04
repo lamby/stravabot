@@ -50,6 +50,8 @@ class LogBot(irc.IRCClient):
         %(athlete)s (%(type)s): %(name)s (%(distance_km).1fkm) https://app.strava.com/activities/%(id)d
     """
 
+    realname = "https://github.com/lamby/stravabot"
+
     def signedOn(self):
         self.join(self.factory.channel)
 
