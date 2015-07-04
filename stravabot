@@ -25,10 +25,13 @@ class StravaClub(object):
     def update(self, initial=False):
         log.msg("Updating data")
 
+        # Prevent spam and also deleting an activity revealing the 201st entry
+        per_page = 200 if initial else 10
+
         r = requests.get(
             'https://www.strava.com/api/v3/clubs/%s/activities' % self.club_id,
             params={
-                'per_page': 200,
+                'per_page': per_page,
                 'access_token': self.access_token,
             },
         )
