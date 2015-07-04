@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
 import sys
-import requests
+import json
+import urllib
 
 from twisted.python import log
 from twisted.internet import reactor, protocol, task
+from twisted.web.client import Agent, readBody
 from twisted.words.protocols import irc
 
 class StravaClub(object):
@@ -17,36 +19,54 @@ class StravaClub(object):
         self.activities_seen = set()
 
     def start(self):
-        self.update(initial=True)
-
         l = task.LoopingCall(self.update)
-        l.start(self.update_interval, now=False)
+        l.start(self.update_interval)
 
-    def update(self, initial=False):
+    def update(self):
         log.msg("Updating data")
 
-        # Prevent spam and also deleting an activity revealing the 201st entry
-        per_page = 200 if initial else 10
-
-        r = requests.get(
-            'https://www.strava.com/api/v3/clubs/%s/activities' % self.club_id,
-            params={
-                'per_page': per_page,
+        url = 'https://www.strava.com/api/v3/clubs/%s/activities?%s' % (
+            self.club_id,
+            urllib.urlencode({
+                # Prevent spam and also deleting an activity revealing the
+                # 201st entry
+                'per_page': 10 if self.activities_seen else 200,
                 'access_token': self.access_token,
-            },
+            }),
         )
 
-        r.raise_for_status()
+        d = Agent(reactor).request('GET', url)
 
-        size = len(self.activities_seen)
+        def process_response(response):
+            assert response.code == 200
 
-        for x in reversed(r.json()):
-            if not initial and x['id'] not in self.activities_seen:
+            d = readBody(response)
+            d.addCallback(self.process_body)
+
+            return d
+
+        def process_error(failure):
+            log.err(failure)
+
+        d.addCallback(process_response)
+        d.addErrback(process_error)
+
+        return d
+
+    def process_body(self, body):
+        # Don't callback if we're populating for the first time
+        run_callbacks = bool(self.activities_seen)
+
+        data = json.loads(body)
+        prev = len(self.activities_seen)
+
+        for x in reversed(data):
+            if run_callbacks and x['id'] not in self.activities_seen:
                 self.callback(x)
 
             self.activities_seen.add(x['id'])
 
-        log.msg("%d new activities found" % (len(self.activities_seen) - size))
+        log.msg("%d new activities" % (len(self.activities_seen) - prev))
 
 class LogBot(irc.IRCClient):
     TEMPLATE = """
