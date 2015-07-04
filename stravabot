@@ -39,7 +39,7 @@ class StravaBot(object):
 
                 print "< %s" % line
 
-                if ' PING ' in line:
+                if line.startswith('PING'):
                     self.send('PONG :%s' % line.split(':')[1])
 
                 if ' 001 ' in line and not self.connected:
