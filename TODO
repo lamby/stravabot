@@ -1,0 +1,6 @@
+TODO
+====
+
+ * Use Twisted's HTTP client over Requests
+ * Setup callbacks in the twisted idiom
+ * Sane packaging
