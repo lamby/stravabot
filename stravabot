@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
+import re
 import sys
 import socket
 import eventlet
 import requests
+
+re_activity = re.compile(r'https?://app.strava.com/activities/(\d+)')
 
 class StravaBot(object):
     def __init__(self, server, port, nickname, channel, club_id, access_token, update_interval):
@@ -47,6 +50,9 @@ class StravaBot(object):
                     self.send('JOIN #%s' % self.channel)
                     eventlet.spawn_n(self.poll, initial=True)
 
+                for x in re_activity.findall(line):
+                    self.activity(int(x))
+
     def send(self, x):
         print "> %s" % x
         self.socket.send('%s\r\n' % x)
@@ -68,6 +74,16 @@ class StravaBot(object):
                 self.seen.add(x['id'])
         finally:
             eventlet.spawn_after(self.update_interval, self.poll)
+
+    def activity(self, activity_id):
+        r = requests.get(
+            'https://www.strava.com/api/v3/activities/%d' % activity_id,
+            params={
+                'access_token': self.access_token,
+            },
+        )
+
+        self.emit(r.json())
 
     def emit(self, x):
         m, s = divmod(x['moving_time'], 60)
