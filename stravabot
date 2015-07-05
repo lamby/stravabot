@@ -76,7 +76,7 @@ class StravaBot(object):
         parts = (
             '\x0303%(firstname)s %(lastname)s\x0f:' % x['athlete'],
             '\x02%s\x0f' % x['name'],
-            '%d:%02d:%02d' % (h, m, s),
+            '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
             '(%.1fkm, %dm)' % (
                 x['distance'] / 1000,
                 x['total_elevation_gain'],
