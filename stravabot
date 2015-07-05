@@ -70,9 +70,13 @@ class StravaBot(object):
             eventlet.spawn_after(self.update_interval, self.poll)
 
     def emit(self, x):
+        m, s = divmod(x['moving_time'], 60)
+        h, m = divmod(m, 60)
+
         parts = (
             '\x0303%(firstname)s %(lastname)s\x0f:' % x['athlete'],
             '\x02%s\x0f' % x['name'],
+            '%d:%02d:%02d' % (h, m, s),
             '(%.1fkm, %dm)' % (
                 x['distance'] / 1000,
                 x['total_elevation_gain'],
