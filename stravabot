@@ -84,22 +84,21 @@ class StravaBot(object):
         self.socket.send('%s\r\n' % x)
 
     def poll(self, initial=False):
-        try:
-            r = requests.get(
-                'https://www.strava.com/api/v3/clubs/%d/activities' % self.club_id,
-                params={
-                    # Prevent spam & deleting entries revealing old ones
-                    'per_page': 200 if initial else 5,
-                    'access_token': self.access_token,
-                },
-            )
+        eventlet.spawn_after(self.update_interval, self.poll)
 
-            for x in reversed(r.json()):
-                if not initial and x['id'] not in self.seen:
-                    self.emit(x)
-                self.seen.add(x['id'])
-        finally:
-            eventlet.spawn_after(self.update_interval, self.poll)
+        r = requests.get(
+            'https://www.strava.com/api/v3/clubs/%d/activities' % self.club_id,
+            params={
+                # Prevent spam & deleting entries revealing old ones
+                'per_page': 200 if initial else 5,
+                'access_token': self.access_token,
+            },
+        )
+
+        for x in reversed(r.json()):
+            if not initial and x['id'] not in self.seen:
+                self.emit(x)
+            self.seen.add(x['id'])
 
     def activity(self, activity_id):
         r = requests.get(
