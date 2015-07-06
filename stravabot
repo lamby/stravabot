@@ -19,7 +19,7 @@ EMOJI = {
     'swim': '🏊',
     'walk': '🚶',
     'windsurf': '⛵️',
-    'workout': '💪'
+    'workout': '💪',
 }
 
 class StravaBot(object):
