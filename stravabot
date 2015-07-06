@@ -8,7 +8,7 @@ import eventlet
 import requests
 
 re_line = re.compile(r'(?:[^ ]+ )?(?P<cmd>[^ ]+) (?P<data>.*)')
-re_activity = re.compile(r'https?://(?:app\.|www\.)?strava.com/activities/(\d+)')
+re_activity = re.compile(r'https?://(?:[^\.]+\.)?strava.com/activities/(\d+)')
 
 class StravaBot(object):
     def __init__(self, server, port, nickname, channel, club_id, access_token, update_interval):
