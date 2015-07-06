@@ -10,6 +10,19 @@ import requests
 re_line = re.compile(r'(?:[^ ]+ )?(?P<cmd>[^ ]+) (?P<data>.*)')
 re_activity = re.compile(r'https?://(?:[^\.]+\.)?strava.com/activities/(\d+)')
 
+EMOJI = {
+    'alpineski': '🎿',
+    'backcountryski': '🎿',
+    'nordicski': '🎿',
+    'ride': '🚴',
+    'run': '🏃',
+    'snowboard': '🏂',
+    'swim': '🏊',
+    'walk': '🚶',
+    'windsurf': '⛵️',
+    'workout': '💪',
+}
+
 class StravaBot(object):
     def __init__(self, server, port, nickname, channel, club_id, access_token, update_interval):
         self.server = server
@@ -105,6 +118,7 @@ class StravaBot(object):
         parts = (
             ('\x0303%(firstname)s %(lastname)s\x0f:' % x['athlete']) \
                 if x['athlete']['resource_state'] != 1 else '',
+            '%s' % EMOJI.get(x['type'].lower(), ''),
             '\x02%s\x0f' % x['name'],
             '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
             '(%.1fkm, %dm)' % (
