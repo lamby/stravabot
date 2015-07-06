@@ -115,7 +115,7 @@ class StravaBot(object):
             '-- https://app.strava.com/activities/%d' % x['id'],
         )
 
-        msg = u' '.join(x.strip() for x in parts if x).encode('utf-8')
+        msg = ' '.join(x.strip().encode('utf-8') for x in parts if x)
 
         self.send('NOTICE #%s :%s' % (self.channel, msg))
 
