@@ -9,6 +9,25 @@ import requests
 
 re_activity = re.compile(r'https?://app.strava.com/activities/(\d+)')
 
+EMOJI = {
+    'alpineski': '🎿',
+    'backcountryski': '🎿',
+    'hike': '',
+    'iceskate': '',
+    'inlineskate': '',
+    'kitesurf': '',
+    'nordicski': '🎿',
+    'ride': '🚴',
+    'rollerski': '',
+    'run': '🏃',
+    'snowboard': '🏂',
+    'snowshoe': '',
+    'swim': '🏊',
+    'walk': '🚶',
+    'windsurf': '⛵️',
+    'workout': '💪'
+}
+
 class StravaBot(object):
     def __init__(self, server, port, nickname, channel, club_id, access_token, update_interval):
         self.server = server
@@ -92,7 +111,7 @@ class StravaBot(object):
 
         parts = (
             '\x0303%(firstname)s %(lastname)s\x0f:' % x['athlete'],
-            '%s' % self.emoji(x['type']),
+            '%s' % EMOJI[x['type'].lower()],
             '\x02%s\x0f' % x['name'],
             '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
             '(%.1fkm, %dm)' % (
@@ -105,26 +124,6 @@ class StravaBot(object):
         msg = ' '.join(x.strip().encode('utf-8') for x in parts if x)
 
         self.send('NOTICE #%s :%s' % (self.channel, msg))
-
-    def emoji(self, a):
-        return {
-            'alpineski': '🎿',
-            'backcountryski': '🎿',
-            'hike': '',
-            'iceskate': '',
-            'inlineskate': '',
-            'kitesurf': '',
-            'nordicski': '🎿',
-            'ride': '🚴',
-            'rollerski': '',
-            'run': '🏃',
-            'snowboard': '🏂',
-            'snowshoe': '',
-            'swim': '🏊',
-            'walk': '🚶',
-            'windsurf': '⛵️',
-            'workout': '💪'
-        }[a.lower()]
 
 if __name__ == '__main__':
     eventlet.monkey_patch()
