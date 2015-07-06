@@ -91,7 +91,8 @@ class StravaBot(object):
         h, m = divmod(m, 60)
 
         parts = (
-            '\x0303%(firstname)s %(lastname)s\x0f:' % x['athlete'],
+            ('\x0303%(firstname)s %(lastname)s\x0f:' % x['athlete']) \
+                if x['athlete']['resource_state'] != 1 else '',
             '\x02%s\x0f' % x['name'],
             '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
             '(%.1fkm, %dm)' % (
