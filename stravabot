@@ -102,7 +102,7 @@ class StravaBot(object):
 
         msg = ' '.join(x.strip().encode('utf-8') for x in parts if x)
 
-        self.send('PRIVMSG #%s :%s' % (self.channel, msg))
+        self.send('NOTICE #%s :%s' % (self.channel, msg))
 
 if __name__ == '__main__':
     eventlet.monkey_patch()
