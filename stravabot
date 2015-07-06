@@ -111,7 +111,7 @@ class StravaBot(object):
 
         parts = (
             '\x0303%(firstname)s %(lastname)s\x0f:' % x['athlete'],
-            '%s' % EMOJI[x['type'].lower()],
+            '%s' % EMOJI.get(x['type'].lower(), ''),
             '\x02%s\x0f' % x['name'],
             '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
             '(%.1fkm, %dm)' % (
