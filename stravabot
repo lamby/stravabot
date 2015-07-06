@@ -53,7 +53,7 @@ class StravaBot(object):
 
     def cmd_001(self, data):
         self.send('JOIN #%s' % self.channel)
-        eventlet.spawn_n(self.poll, initial=True)
+        self.poll(initial=True)
 
     def cmd_PING(self, data):
         self.send('PONG %s' % data)
