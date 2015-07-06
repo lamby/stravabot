@@ -7,6 +7,7 @@ import socket
 import eventlet
 import requests
 
+re_line = re.compile(r'(?:[^ ]+ )?(?P<cmd>[^ ]+) (?P<data>.*)')
 re_activity = re.compile(r'https?://(?:app\.|www\.)?strava.com/activities/(\d+)')
 
 class StravaBot(object):
@@ -20,7 +21,6 @@ class StravaBot(object):
         self.update_interval = int(update_interval)
 
         self.socket = socket.socket()
-        self.connected = False
         self.seen = set()
 
     def run(self):
@@ -33,26 +33,34 @@ class StravaBot(object):
         })
 
         while True:
-            data = self.socket.recv(4096)
-
-            for line in data.split('\n'):
-                line = line.strip()
-
+            for line in self.socket.recv(4096).split('\r\n'):
                 if not line:
                     continue
 
                 print "< %s" % line
 
-                if line.startswith('PING'):
-                    self.send('PONG :%s' % line.split(':')[1])
+                m = re_line.match(line.strip())
 
-                if ' 001 ' in line and not self.connected:
-                    self.connected = True
-                    self.send('JOIN #%s' % self.channel)
-                    eventlet.spawn_n(self.poll, initial=True)
+                if m is None:
+                    continue
 
-                for x in re_activity.findall(line):
-                    self.activity(int(x))
+                try:
+                    fn = getattr(self, 'cmd_%s' % m.group('cmd'))
+                except AttributeError:
+                    continue
+
+                fn(m.group('data'))
+
+    def cmd_001(self, data):
+        self.send('JOIN #%s' % self.channel)
+        eventlet.spawn_n(self.poll, initial=True)
+
+    def cmd_PING(self, data):
+        self.send('PONG %s' % data)
+
+    def cmd_PRIVMSG(self, data):
+        for x in re_activity.findall(data):
+            self.activity(int(x))
 
     def send(self, x):
         print "> %s" % x
