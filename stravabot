@@ -77,12 +77,11 @@ class StravaBot(object):
             return
 
         for x in re_activity.findall(data):
-            self.activity(requests.get(
-                'https://www.strava.com/api/v3/activities/%s' % x,
-                params={
-                    'access_token': self.access_token,
-                },
-            ).json())
+            url = 'https://www.strava.com/api/v3/activities/%s' % x
+
+            self.activity(requests.get(url, params={
+                'access_token': self.access_token,
+            }).json())
 
     def send(self, x):
         print "> %s" % x
