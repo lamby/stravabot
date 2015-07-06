@@ -59,6 +59,10 @@ class StravaBot(object):
         self.send('PONG %s' % data)
 
     def cmd_PRIVMSG(self, data):
+        # Only messages on "our" channel
+        if not data.startswith('#%s' % self.channel):
+            return
+
         for x in re_activity.findall(data):
             self.activity(int(x))
 
