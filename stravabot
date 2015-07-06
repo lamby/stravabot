@@ -49,7 +49,7 @@ class StravaBot(object):
                 except AttributeError:
                     continue
 
-                fn(m.group('data'))
+                eventlet.spawn_n(fn, m.group('data'))
 
     def cmd_001(self, data):
         self.send('JOIN #%s' % self.channel)
@@ -60,7 +60,7 @@ class StravaBot(object):
 
     def cmd_PRIVMSG(self, data):
         for x in re_activity.findall(data):
-            eventlet.spawn_n(self.activity, int(x))
+            self.activity(int(x))
 
     def send(self, x):
         print "> %s" % x
