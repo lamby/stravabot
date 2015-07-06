@@ -77,7 +77,12 @@ class StravaBot(object):
             return
 
         for x in re_activity.findall(data):
-            self.activity(int(x))
+            self.activity(requests.get(
+                'https://www.strava.com/api/v3/activities/%s' % x,
+                params={
+                    'access_token': self.access_token,
+                },
+            ).json())
 
     def send(self, x):
         print "> %s" % x
@@ -97,20 +102,10 @@ class StravaBot(object):
 
         for x in reversed(r.json()):
             if not initial and x['id'] not in self.seen:
-                self.emit(x)
+                self.activity(x)
             self.seen.add(x['id'])
 
-    def activity(self, activity_id):
-        r = requests.get(
-            'https://www.strava.com/api/v3/activities/%d' % activity_id,
-            params={
-                'access_token': self.access_token,
-            },
-        )
-
-        self.emit(r.json())
-
-    def emit(self, x):
+    def activity(self, x):
         m, s = divmod(x['moving_time'], 60)
         h, m = divmod(m, 60)
 
