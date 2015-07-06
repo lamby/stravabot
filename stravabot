@@ -60,7 +60,7 @@ class StravaBot(object):
 
     def cmd_PRIVMSG(self, data):
         for x in re_activity.findall(data):
-            self.activity(int(x))
+            eventlet.spawn_n(self.activity, int(x))
 
     def send(self, x):
         print "> %s" % x
