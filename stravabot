@@ -11,16 +11,16 @@ re_line = re.compile(r'(?:[^ ]+ )?(?P<cmd>[^ ]+) (?P<data>.*)')
 re_activity = re.compile(r'https?://(?:[^\.]+\.)?strava.com/activities/(\d+)')
 
 EMOJI = {
-    'alpineski': '🎿',
-    'backcountryski': '🎿',
-    'nordicski': '🎿',
-    'ride': '🚴',
-    'run': '🏃',
-    'snowboard': '🏂',
-    'swim': '🏊',
-    'walk': '🚶',
-    'windsurf': '⛵️',
-    'workout': '💪',
+    'alpineski': u'🎿',
+    'backcountryski': u'🎿',
+    'nordicski': u'🎿',
+    'ride': u'🚴',
+    'run': u'🏃',
+    'snowboard': u'🏂',
+    'swim': u'🏊',
+    'walk': u'🚶',
+    'windsurf': u'⛵️',
+    'workout': u'💪',
 }
 
 class StravaBot(object):
