@@ -109,9 +109,11 @@ class StravaBot(object):
         m, s = divmod(x['moving_time'], 60)
         h, m = divmod(m, 60)
 
+        if x['athlete']['resource_state'] == 1:
+            x['athlete'] = self.GET('/athletes/%s' % x['athlete']['id'])
+
         parts = (
-            ('\x0303%(firstname)s %(lastname)s\x0f:' % x['athlete']) \
-                if x['athlete']['resource_state'] != 1 else '',
+            '\x0303%(firstname)s %(lastname)s\x0f:' % x['athlete'],
             '%s' % EMOJI.get(x['type'].lower(), ''),
             '\x02%s\x0f' % x['name'],
             '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
