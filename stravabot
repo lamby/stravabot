@@ -79,9 +79,12 @@ class StravaBot(object):
         for x in re_activity.findall(data):
             url = 'https://www.strava.com/api/v3/activities/%s' % x
 
-            self.activity(requests.get(url, params={
-                'access_token': self.access_token,
-            }).json())
+            self.activity(self.GET(url))
+
+    def GET(self, url, **params):
+        params.setdefault('access_token', self.access_token)
+
+        return requests.get(url, params=params).json()
 
     def send(self, x):
         print "> %s" % x
@@ -90,16 +93,13 @@ class StravaBot(object):
     def poll(self, initial=False):
         eventlet.spawn_after(self.update_interval, self.poll)
 
-        r = requests.get(
+        data = self.GET(
             'https://www.strava.com/api/v3/clubs/%d/activities' % self.club_id,
-            params={
-                # Prevent spam & deleting entries revealing old ones
-                'per_page': 200 if initial else 5,
-                'access_token': self.access_token,
-            },
+            # Prevent spam & deleting entries revealing old ones
+            per_page=200 if initial else 5,
         )
 
-        for x in reversed(r.json()):
+        for x in reversed(data):
             if not initial and x['id'] not in self.seen:
                 self.activity(x)
             self.seen.add(x['id'])
