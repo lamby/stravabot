@@ -77,14 +77,15 @@ class StravaBot(object):
             return
 
         for x in re_activity.findall(data):
-            url = 'https://www.strava.com/api/v3/activities/%s' % x
-
-            self.activity(self.GET(url))
+            self.activity(self.GET('/activities/%s' % x))
 
     def GET(self, url, **params):
         params.setdefault('access_token', self.access_token)
 
-        return requests.get(url, params=params).json()
+        return requests.get(
+            'https://www.strava.com/api/v3%s' % url,
+            params=params,
+        ).json()
 
     def send(self, x):
         print "> %s" % x
@@ -94,7 +95,7 @@ class StravaBot(object):
         eventlet.spawn_after(self.update_interval, self.poll)
 
         data = self.GET(
-            'https://www.strava.com/api/v3/clubs/%d/activities' % self.club_id,
+            '/clubs/%d/activities' % self.club_id,
             # Prevent spam & deleting entries revealing old ones
             per_page=200 if initial else 5,
         )
