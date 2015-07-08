@@ -109,6 +109,7 @@ class StravaBot(object):
         m, s = divmod(x['moving_time'], 60)
         h, m = divmod(m, 60)
 
+        # Some returned activities do not contain enough athlete data
         if x['athlete']['resource_state'] == 1:
             x['athlete'] = self.GET('/athletes/%s' % x['athlete']['id'])
 
