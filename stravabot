@@ -104,9 +104,11 @@ class StravaBot(object):
         for x in data:
             if not initial and x['id'] not in self.seen:
                 # Allow time for activities to be renamed, etc.
-                eventlet.spawn_after(self.latency, lambda x=x: self.activity(
-                    self.GET('/activities/%s' % x['id']),
-                ))
+                eventlet.spawn_after(
+                    self.latency,
+                    lambda x: self.activity(self.GET(x)),
+                    '/activities/%s' % x['id'],
+                )
 
             self.seen.add(x['id'])
 
