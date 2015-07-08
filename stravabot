@@ -24,7 +24,7 @@ EMOJI = {
 }
 
 class StravaBot(object):
-    def __init__(self, server, port, nickname, channel, club_id, access_token, update_interval):
+    def __init__(self, server, port, nickname, channel, club_id, access_token, update_interval, latency):
         self.server = server
         self.port = int(port)
         self.nickname = nickname
@@ -32,6 +32,7 @@ class StravaBot(object):
         self.club_id = int(club_id)
         self.access_token = access_token
         self.update_interval = int(update_interval)
+        self.latency = int(latency)
 
         self.socket = socket.socket()
         self.seen = set()
@@ -102,7 +103,11 @@ class StravaBot(object):
 
         for x in reversed(data):
             if not initial and x['id'] not in self.seen:
-                self.activity(x)
+                # Allow time for activities to be renamed, etc.
+                eventlet.spawn_after(self.latency, lambda x=x: self.activity(
+                    self.GET('/activities/%s' % x['id']),
+                ))
+
             self.seen.add(x['id'])
 
     def activity(self, x):
