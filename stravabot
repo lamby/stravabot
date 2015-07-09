@@ -126,7 +126,8 @@ class StravaBot(object):
         inner = (
             '{:,.1f}km'.format(x['distance'] / 1000),
             '{:,.0f}m'.format(x['total_elevation_gain']),
-            '{:,.1f}km/h'.format(x['average_speed'] * 60 * 60 / 1000),
+            '{:,.1f}km/h'.format(x['average_speed'] * 60 * 60 / 1000)
+                if x['type'] == 'Ride' else '',
         )
 
         outer = (
