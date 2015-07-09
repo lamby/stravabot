@@ -132,9 +132,10 @@ class StravaBot(object):
             u'— https://app.strava.com/activities/%d' % x['id'],
         )
 
-        msg = ' '.join(x.strip().encode('utf-8') for x in parts if x)
+        def fmt(xs):
+            return ' '.join(x.strip().encode('utf-8') for x in xs if x)
 
-        self.send('NOTICE #%s :%s' % (self.channel, msg))
+        self.send('NOTICE #%s :%s' % (self.channel, fmt(parts)))
 
 if __name__ == '__main__':
     eventlet.monkey_patch()
