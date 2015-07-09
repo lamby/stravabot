@@ -120,7 +120,7 @@ class StravaBot(object):
         if x['athlete']['resource_state'] == 1:
             x['athlete'] = self.GET('/athletes/%s' % x['athlete']['id'])
 
-        def fmt(separator, xs):
+        def fmt(xs, separator):
             return separator.join(x.strip().encode('utf-8') for x in xs if x)
 
         outer = (
