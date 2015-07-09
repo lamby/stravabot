@@ -123,15 +123,17 @@ class StravaBot(object):
         def fmt(xs, separator):
             return separator.join(x.strip().encode('utf-8') for x in xs if x)
 
+        inner = (
+            '{:,.1f}km'.format(x['distance'] / 1000),
+            '{:,.0f}m'.format(x['total_elevation_gain']),
+        )
+
         outer = (
             '\x0303%(firstname)s %(lastname)s\x0f:' % x['athlete'],
             '%s' % EMOJI.get(x['type'].lower(), ''),
             '\x02%s\x0f' % x['name'],
             '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
-            '({:,.1f}km, {:,.0f}m)'.format(
-                x['distance'] / 1000,
-                x['total_elevation_gain'],
-            ) if x['distance'] > 100 else '',
+            '(%s)' % fmt(inner, ', ') if x['distance'] > 100 else '',
             u'— https://app.strava.com/activities/%d' % x['id'],
         )
 
