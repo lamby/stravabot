@@ -120,7 +120,7 @@ class StravaBot(object):
         if x['athlete']['resource_state'] == 1:
             x['athlete'] = self.GET('/athletes/%s' % x['athlete']['id'])
 
-        parts = (
+        outer = (
             '\x0303%(firstname)s %(lastname)s\x0f:' % x['athlete'],
             '%s' % EMOJI.get(x['type'].lower(), ''),
             '\x02%s\x0f' % x['name'],
@@ -135,7 +135,7 @@ class StravaBot(object):
         def fmt(xs):
             return ' '.join(x.strip().encode('utf-8') for x in xs if x)
 
-        self.send('NOTICE #%s :%s' % (self.channel, fmt(parts)))
+        self.send('NOTICE #%s :%s' % (self.channel, fmt(outer)))
 
 if __name__ == '__main__':
     eventlet.monkey_patch()
