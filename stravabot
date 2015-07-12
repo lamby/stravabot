@@ -118,11 +118,11 @@ class StravaBot(object):
         )
 
         outer = (
-            '\x0303%(firstname)s %(lastname)s\x0f:' % x['athlete'],
-            '\x02%s\x0f' % x['name'],
+            '\x0303{athlete[firstname]} {athlete[lastname]}:\x0f'.format(**x),
+            '\x02{name}\x0f'.format(**x),
             '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
-            '(%s)' % fmt(inner, ', ') if x['distance'] > 100 else '',
-            u'— https://app.strava.com/activities/%d' % x['id'],
+            u'(%s)' % fmt(inner, ', ') if x['distance'] > 100 else '',
+            u'— https://app.strava.com/activities/{id}'.format(**x),
         )
 
         self.send('NOTICE #%s :%s' % (self.channel, fmt(outer, ' ')))
