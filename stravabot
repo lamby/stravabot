@@ -120,7 +120,7 @@ class StravaBot(object):
         outer = (
             '\x0303{athlete[firstname]} {athlete[lastname]}\x0f'.format(**x),
             '\x02{name}\x0f'.format(**x),
-            '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
+            u'— %s%02d:%02d' % (('%d:' % h if h else ''), m, s),
             u'(%s)' % fmt(inner, ', ') if x['distance'] > 100 else '',
             u'— https://app.strava.com/activities/{id}'.format(**x),
         )
