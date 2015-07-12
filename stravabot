@@ -108,7 +108,7 @@ class StravaBot(object):
             x['athlete'] = self.GET('/athletes/%s' % x['athlete']['id'])
 
         def fmt(xs, separator):
-            return separator.join(x.strip() for x in xs if x).encode('utf-8')
+            return separator.join(y.strip() for y in ys if y).encode('utf-8')
 
         inner = [
             '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
