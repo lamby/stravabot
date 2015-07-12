@@ -107,8 +107,8 @@ class StravaBot(object):
         if x['athlete']['resource_state'] == 1:
             x['athlete'] = self.GET('/athletes/%s' % x['athlete']['id'])
 
-        def fmt(xs, separator):
-            return separator.join(y.strip() for y in ys if y).encode('utf-8')
+        def fmt(ys, separator):
+            return separator.join(y.strip().format(**x) for y in ys if y)
 
         inner = [
             '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
@@ -117,16 +117,16 @@ class StravaBot(object):
         if x['distance'] > 100:
             inner.extend((
                 '{:,.1f}km'.format(x['distance'] / 1000),
-                '{:,.0f}m'.format(x['total_elevation_gain']),
+                '{total_elevation_gain:,.0f}m',
                 '{:,.1f}km/h'.format(x['average_speed'] * 60 * 60 / 1000)
                     if x['type'] == 'Ride' else '',
             ))
 
         outer = (
             '\x0303{athlete[firstname]} {athlete[lastname]}\x0f: '
-                '\x02{name}\x0f'.format(**x),
+                '\x02{name}\x0f',
             fmt(inner, ', '),
-            'https://app.strava.com/activities/{id}'.format(**x),
+            'https://app.strava.com/activities/{id}',
         )
 
         self.send('NOTICE #%s :%s' % (self.channel, fmt(outer, u' — ')))
