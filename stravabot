@@ -77,7 +77,7 @@ class StravaBot(object):
 
     def send(self, x):
         print "> %s" % x
-        self.socket.send('%s\r\n' % x)
+        self.socket.send('%s\r\n' % x.encode('utf-8'))
 
     def poll(self, initial=False):
         eventlet.spawn_after(self.update_interval, self.poll)
