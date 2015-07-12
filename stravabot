@@ -108,24 +108,28 @@ class StravaBot(object):
             x['athlete'] = self.GET('/athletes/%s' % x['athlete']['id'])
 
         def fmt(xs, separator):
-            return separator.join(x.strip().encode('utf-8') for x in xs if x)
+            return separator.join(x.strip() for x in xs if x).encode('utf-8')
 
-        inner = (
-            '{:,.1f}km'.format(x['distance'] / 1000),
-            '{:,.0f}m'.format(x['total_elevation_gain']),
-            '{:,.1f}km/h'.format(x['average_speed'] * 60 * 60 / 1000)
-                if x['type'] == 'Ride' else '',
-        )
+        inner = [
+            '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
+        ]
+
+        if x['distance'] > 100:
+            inner.extend((
+                '{:,.1f}km'.format(x['distance'] / 1000),
+                '{:,.0f}m'.format(x['total_elevation_gain']),
+                '{:,.1f}km/h'.format(x['average_speed'] * 60 * 60 / 1000)
+                    if x['type'] == 'Ride' else '',
+            ))
 
         outer = (
-            '\x0303{athlete[firstname]} {athlete[lastname]}\x0f'.format(**x),
-            '\x02{name}\x0f'.format(**x),
-            u'— %s%02d:%02d' % (('%d:' % h if h else ''), m, s),
-            u'(%s)' % fmt(inner, ', ') if x['distance'] > 100 else '',
-            u'— https://app.strava.com/activities/{id}'.format(**x),
+            '\x0303{athlete[firstname]} {athlete[lastname]}\x0f '
+                '\x02{name}\x0f'.format(**x),
+            fmt(inner, ', '),
+            'https://app.strava.com/activities/{id}'.format(**x),
         )
 
-        self.send('NOTICE #%s :%s' % (self.channel, fmt(outer, ' ')))
+        self.send('NOTICE #%s :%s' % (self.channel, fmt(outer, u' — ')))
 
 if __name__ == '__main__':
     eventlet.monkey_patch()
