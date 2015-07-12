@@ -115,12 +115,12 @@ class StravaBot(object):
         ]
 
         if x['distance'] > 100:
-            inner.extend((
+            inner = [
                 '{:,.1f}km'.format(x['distance'] / 1000),
                 '{total_elevation_gain:,.0f}m',
                 '{:,.1f}km/h'.format(x['average_speed'] * 60 * 60 / 1000)
                     if x['type'] == 'Ride' else '',
-            ))
+            ] + inner
 
         outer = (
             '\x0303{athlete[firstname]} {athlete[lastname]}\x0f: '
