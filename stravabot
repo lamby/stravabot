@@ -84,7 +84,7 @@ class StravaBot(object):
         ).json()
 
     def send(self, x):
-        print "> %s" % x
+        print "> %s" % x.encode('utf-8')
         self.socket.send('%s\r\n' % x.encode('utf-8'))
 
     def poll(self, initial=False):
