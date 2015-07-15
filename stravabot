@@ -110,17 +110,17 @@ class StravaBot(object):
         def fmt(ys, separator):
             return separator.join(y.strip().format(**x) for y in ys if y)
 
-        inner = [
-            '%s%02d:%02d' % (('%d:' % h if h else ''), m, s),
-        ]
+        inner = []
 
         if x['distance'] > 100:
-            inner = [
+            inner.extend((
                 '{:,.1f}km'.format(x['distance'] / 1000),
                 '{:,.1f}km/h'.format(x['average_speed'] * 60 * 60 / 1000)
                     if x['type'] == 'Ride' else '',
                 '{total_elevation_gain:,.0f}m',
-            ] + inner
+            ))
+
+        inner.append('%s%02d:%02d' % (('%d:' % h if h else ''), m, s))
 
         outer = (
             u'\x0303{athlete[firstname]} {athlete[lastname]}\x0f: '
