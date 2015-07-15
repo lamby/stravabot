@@ -120,6 +120,13 @@ class StravaBot(object):
                 '{total_elevation_gain:,.0f}m',
             ))
 
+        if x['device_watts']:
+            inner.extend((
+                '{kilojoules:,.0f}kJ',
+                '{average_watts:,.0f}W AP',
+                '{weighted_average_watts:,.0f}W NP',
+            ))
+
         inner.append('%s%02d:%02d' % (('%d:' % h if h else ''), m, s))
 
         outer = (
