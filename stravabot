@@ -123,7 +123,7 @@ class StravaBot(object):
             ] + inner
 
         outer = (
-            '\x0303{athlete[firstname]} {athlete[lastname]}\x0f: '
+            u'\x0303{athlete[firstname]} {athlete[lastname]}\x0f: '
                 '\x02{name}\x0f',
             fmt(inner, ', '),
             'https://app.strava.com/activities/{id}',
