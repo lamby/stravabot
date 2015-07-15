@@ -7,6 +7,8 @@ import socket
 import eventlet
 import requests
 
+from eventlet import backdoor
+
 re_line = re.compile(r'(?:[^ ]+ )?(?P<cmd>[^ ]+) (?P<data>.*)')
 re_activity = re.compile(r'https?://(?:[^\.]+\.)?strava.com/activities/(\d+)')
 
@@ -26,6 +28,12 @@ class StravaBot(object):
 
     def run(self):
         self.socket.connect((self.server, self.port))
+
+        eventlet.spawn(
+            backdoor.backdoor_server,
+            eventlet.listen(('127.0.0.1', 3000)),
+            locals={'bot': self},
+        )
 
         self.send("NICK %s" % self.nickname)
         self.send("USER %(nick)s %(nick)s %(nick)s :%(url)s" % {
