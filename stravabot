@@ -108,6 +108,8 @@ class StravaBot(object):
             self.seen.add(x['id'])
 
     def activity(self, x):
+        self.seen.add(x['id'])
+
         m, s = divmod(x['moving_time'], 60)
         h, m = divmod(m, 60)
 
