@@ -1,0 +1,70 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:          stravabot
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      
+# Short-Description:
+# Description:       
+### END INIT INFO
+
+NAME=stravabot
+DAEMON=/usr/bin/$NAME
+PIDFILE=/var/run/$NAME.pid
+
+test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+if [ -e /etc/default/$NAME ]
+then
+	. /etc/default/$NAME
+fi
+
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
+
+case "$1" in
+	start)
+		if [ "$STRAVABOT_ARGS" = "" ]
+		then
+			exit 0
+		fi
+
+		log_begin_msg "Starting $NAME" $NAME
+		start-stop-daemon \
+			--start \
+			--quiet \
+			--exec $DAEMON \
+			--chuid nobody:nogroup \
+			--pidfile $PIDFILE \
+			--background \
+			--make-pidfile \
+			-- $STRAVABOT_ARGS
+		log_end_msg $?
+		;;
+	stop)
+		log_begin_msg "Stopping $NAME..." $NAME
+		start-stop-daemon \
+			--stop \
+			--quiet \
+			--oknodo \
+			--pidfile $PIDFILE
+		log_end_msg $?
+		;;
+
+	reload|force-reload|restart)
+		$0 stop
+		$0 start
+		;;
+	status)
+		status_of_proc -p $PIDFILE $DAEMON $NAME
+		;;
+	*)
+		echo "Usage: /etc/init.d/rsync {start|stop|reload|force-reload|restart|status}"
+		exit 1
+		;;
+esac
+
+exit 0

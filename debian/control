@@ -1,0 +1,15 @@
+Source: stravabot
+Section: net
+Priority: optional
+Maintainer: Chris Lamb <chris@chris-lamb.co.uk>
+Build-Depends: debhelper (>= 8), dh-python, python
+Standards-Version: 3.9.6
+
+Package: stravabot
+Architecture: all
+Depends: python,
+         python-eventlet,
+         python-requests,
+         ${misc:Depends},
+         ${python:Depends}
+Description: Toolbox for implementing GTD-like behaviours in your IMAP inbox
