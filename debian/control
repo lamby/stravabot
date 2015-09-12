@@ -12,4 +12,4 @@ Depends: python,
          python-requests,
          ${misc:Depends},
          ${python:Depends}
-Description: Toolbox for implementing GTD-like behaviours in your IMAP inbox
+Description: Strava -> IRC gateway
