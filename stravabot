@@ -44,6 +44,9 @@ class StravaBot(object):
         while True:
             data = self.socket.recv(4096)
 
+            if not data:
+                break
+
             for line in data.split('\r\n'):
                 if not line:
                     continue
@@ -61,6 +64,8 @@ class StravaBot(object):
                     continue
 
                 eventlet.spawn_n(fn, m.group('data'))
+
+        self.socket.close()
 
     def cmd_001(self, data):
         self.send('JOIN #%s' % self.channel)
