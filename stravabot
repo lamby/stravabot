@@ -27,13 +27,13 @@ class StravaBot(object):
         self.seen = set()
 
     def run(self):
-        self.socket.connect((self.server, self.port))
-
         eventlet.spawn(
             backdoor.backdoor_server,
             eventlet.listen(('127.0.0.1', 3000)),
             locals={'bot': self},
         )
+
+        self.socket.connect((self.server, self.port))
 
         self.send("NICK %s" % self.nickname)
         self.send("USER %(nick)s %(nick)s %(nick)s :%(url)s" % {
