@@ -42,7 +42,9 @@ class StravaBot(object):
         })
 
         while True:
-            for line in self.socket.recv(4096).split('\r\n'):
+            data = self.socket.recv(4096)
+
+            for line in data.split('\r\n'):
                 if not line:
                     continue
 
