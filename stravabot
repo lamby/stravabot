@@ -33,6 +33,11 @@ class StravaBot(object):
             locals={'bot': self},
         )
 
+        # Stay connected
+        while True:
+            self.mainloop()
+
+    def mainloop(self):
         self.socket.connect((self.server, self.port))
 
         self.send("NICK %s" % self.nickname)
