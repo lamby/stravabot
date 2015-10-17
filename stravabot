@@ -3,6 +3,7 @@
 
 import re
 import sys
+import time
 import socket
 import eventlet
 import requests
@@ -25,6 +26,7 @@ class StravaBot(object):
 
         self.socket = socket.socket()
         self.seen = set()
+        self.announced = {} # {activity_id: time.time}
 
     def run(self):
         eventlet.spawn(
@@ -120,7 +122,12 @@ class StravaBot(object):
             self.seen.add(x['id'])
 
     def activity(self, x):
+        # Print activity once at most every X secs
+        if self.announced.get(x['id'], 0) >= time.time() - 1800:
+            return
+
         self.seen.add(x['id'])
+        self.announced[x['id']] = time.time()
 
         m, s = divmod(x['moving_time'], 60)
         h, m = divmod(m, 60)
