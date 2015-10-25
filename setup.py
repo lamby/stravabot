@@ -6,7 +6,7 @@ setup(
     name='stravabot',
 
     url="https://chris-lamb.co.uk/projects/stravabot",
-    version='1.0.0',
+    version='1.0.1',
     description="Strava -> IRC gateway",
 
 
