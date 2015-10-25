@@ -4,15 +4,17 @@ from setuptools import setup
 
 setup(
     name='stravabot',
+
+    url="https://chris-lamb.co.uk/projects/stravabot",
     version='1.0.0',
+    description="Strava -> IRC gateway",
+
+
+    author="Chris Lamb",
+    author_email="chris@chris-lamb.co.uk",
     license="BSD",
 
     packages=(),
-    description="",
-
-    author='Chris Lamb',
-    author_email='chris@chris-lamb.co.uk',
-
     scripts=(
         'stravabot',
     ),
