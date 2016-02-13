@@ -1,0 +1,22 @@
+[Unit]
+After=network.target
+Description=Simple IRC Strava bot
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/stravabot "${HOST}" "${PORT}" "${NICK}" "${CHANNEL}" "${CLUB_ID}" "${ACCESS_TOKEN}" "${UPDATE_INTERVAL}" "${LATENCY}"
+EnvironmentFile=/etc/default/stravabot
+Restart=always
+User=nobody
+Group=nogroup
+
+PrivateTmp=yes
+PrivateDevices=yes
+LimitNPROC=1
+LimitFSIZE=0
+ProtectHome=yes
+ProtectSystem=full
+ReadOnlyDirectories=/
+
+[Install]
+WantedBy=multi-user.target

@@ -2,11 +2,19 @@ Source: stravabot
 Section: net
 Priority: optional
 Maintainer: Chris Lamb <chris@chris-lamb.co.uk>
-Build-Depends: debhelper (>= 9), dh-virtualenv (>= 0.10), python, python-dev
+Build-Depends:
+ debhelper (>= 9),
+ dh-systemd,
+ dh-virtualenv (>= 0.10),
+ python,
+ python-dev
 Standards-Version: 3.9.6
 
 Package: stravabot
 Architecture: any
-Pre-Depends: dpkg (>= 1.16.1), python2.7, ${misc:Pre-Depends}
-Depends: ${misc:Depends}
+Pre-Depends:
+ python2.7,
+ ${misc:Pre-Depends}
+Depends:
+ ${misc:Depends}
 Description: Strava -> IRC gateway

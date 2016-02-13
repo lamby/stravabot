@@ -1,2 +1,8 @@
-# (An empty string disables startup)
-STRAVABOT_ARGS=""
+HOST="irc.freenode.net"
+PORT="6667"
+NICK="stravabot"
+CHANNEL=""
+CLUB_ID=""
+ACCESS_TOKEN=""
+UPDATE_INTERVAL="60"
+LATENCY="180"

@@ -1,5 +1,5 @@
-argparse==1.2.1
-eventlet==0.17.4
+argparse==1.4.0
+eventlet==0.18.3
 greenlet==0.4.9
-requests==2.8.1
+requests==2.9.1
 wsgiref==0.1.2
