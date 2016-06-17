@@ -9,6 +9,8 @@ EnvironmentFile=/etc/default/stravabot
 Restart=always
 User=nobody
 Group=nogroup
+RestartSec=15
+StartLimitInterval=0
 
 PrivateTmp=yes
 PrivateDevices=yes
