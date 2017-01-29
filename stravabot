@@ -75,7 +75,7 @@ class StravaBot(object):
         self.socket.close()
 
     def cmd_001(self, data):
-        self.send('JOIN #%s' % self.channel)
+        self.send('JOIN %s' % self.channel)
         self.poll(initial=True)
 
     def cmd_PING(self, data):
@@ -83,7 +83,7 @@ class StravaBot(object):
 
     def cmd_PRIVMSG(self, data):
         # Only messages on "our" channel
-        if not data.startswith('#%s' % self.channel):
+        if not data.startswith('%s' % self.channel):
             return
 
         for x in re_activity.findall(data):
@@ -165,7 +165,7 @@ class StravaBot(object):
             'https://app.strava.com/activities/{id}',
         )
 
-        self.send('NOTICE #%s :%s' % (self.channel, fmt(outer, u' — ')))
+        self.send('NOTICE %s :%s' % (self.channel, fmt(outer, u' — ')))
 
 if __name__ == '__main__':
     eventlet.monkey_patch()
