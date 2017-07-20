@@ -43,7 +43,7 @@ class StravaBot(object):
     def mainloop(self):
         self.socket.connect((self.server, self.port))
 
-        self.send("NICK %s" % self.nickname)
+        self.send("NICK {}".format(self.nickname))
         self.send("USER %(nick)s %(nick)s %(nick)s :%(url)s" % {
             'url': 'https://github.com/lamby/stravabot',
             'nick': self.nickname,
@@ -59,7 +59,7 @@ class StravaBot(object):
                 if not line:
                     continue
 
-                print "< %s" % line
+                print "< {}".format(line)
 
                 m = re_line.match(line.strip())
 
@@ -67,7 +67,7 @@ class StravaBot(object):
                     continue
 
                 try:
-                    fn = getattr(self, 'cmd_%s' % m.group('cmd'))
+                    fn = getattr(self, 'cmd_{}'.format(m.group('cmd')))
                 except AttributeError:
                     continue
 
@@ -76,37 +76,37 @@ class StravaBot(object):
         self.socket.close()
 
     def cmd_001(self, data):
-        self.send('JOIN %s' % self.channel)
+        self.send('JOIN {}'.format(self.channel))
         self.poll(initial=True)
 
     def cmd_PING(self, data):
-        self.send('PONG %s' % data)
+        self.send('PONG {}'.format(data))
 
     def cmd_PRIVMSG(self, data):
         # Only messages on "our" channel
-        if not data.startswith('%s' % self.channel):
+        if not data.startswith('{}'.format(self.channel)):
             return
 
         for x in re_activity.findall(data):
-            self.activity(self.GET('/activities/%s' % x))
+            self.activity(self.GET('/activities/{}'.format(x)))
 
     def GET(self, url, **params):
         params.setdefault('access_token', self.access_token)
 
         return requests.get(
-            'https://www.strava.com/api/v3%s' % url,
+            'https://www.strava.com/api/v3{}'.format(url),
             params=params,
         ).json()
 
     def send(self, x):
-        print "> %s" % x.encode('utf-8')
-        self.socket.send('%s\r\n' % x.encode('utf-8'))
+        print "> {}".format(x.encode('utf-8'))
+        self.socket.send('{}\r\n'.format(x.encode('utf-8')))
 
     def poll(self, initial=False):
         eventlet.spawn_after(self.update_interval, self.poll)
 
         data = self.GET(
-            '/clubs/%d/activities' % self.club_id,
+            '/clubs/{}/activities'.format(self.club_id),
             # Prevent spam & deleting entries revealing old ones
             per_page=200 if initial else 5,
         )
@@ -117,7 +117,7 @@ class StravaBot(object):
                 eventlet.spawn_after(
                     self.latency,
                     lambda x: self.activity(self.GET(x)),
-                    '/activities/%s' % x['id'],
+                    '/activities/{}'.format(x['id']),
                 )
 
             self.seen.add(x['id'])
@@ -135,7 +135,7 @@ class StravaBot(object):
 
         # Some returned activities do not contain enough athlete data
         if x['athlete']['resource_state'] == 1:
-            x['athlete'] = self.GET('/athletes/%s' % x['athlete']['id'])
+            x['athlete'] = self.GET('/athletes/{}'.format(x['athlete']['id']))
 
         def fmt(ys, separator):
             return separator.join(y.strip().format(**x) for y in ys if y)
@@ -166,7 +166,7 @@ class StravaBot(object):
             'https://app.strava.com/activities/{id}',
         )
 
-        self.send('NOTICE %s :%s' % (self.channel, fmt(outer, u' — ')))
+        self.send('NOTICE {} :{}'.format((self.channel, fmt(outer, u' — ')))
 
 
 if __name__ == '__main__':
