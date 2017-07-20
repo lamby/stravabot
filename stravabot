@@ -13,6 +13,7 @@ from eventlet import backdoor
 re_line = re.compile(r'(?:[^ ]+ )?(?P<cmd>[^ ]+) (?P<data>.*)')
 re_activity = re.compile(r'https?://(?:[^\.]+\.)?strava.com/activities/(\d+)')
 
+
 class StravaBot(object):
     def __init__(self, server, port, nickname, channel, club_id, access_token, update_interval, latency):
         self.server = server
@@ -26,7 +27,7 @@ class StravaBot(object):
 
         self.socket = socket.socket()
         self.seen = set()
-        self.announced = {} # {activity_id: time.time}
+        self.announced = {}  # {activity_id: time.time}
 
     def run(self):
         eventlet.spawn(
@@ -166,6 +167,7 @@ class StravaBot(object):
         )
 
         self.send('NOTICE %s :%s' % (self.channel, fmt(outer, u' — ')))
+
 
 if __name__ == '__main__':
     eventlet.monkey_patch()
