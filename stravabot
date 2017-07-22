@@ -166,7 +166,7 @@ class StravaBot(object):
             'https://app.strava.com/activities/{id}',
         )
 
-        self.send('NOTICE {} :{}'.format((self.channel, fmt(outer, u' — ')))
+        self.send('NOTICE {} :{}'.format((self.channel, fmt(outer, u' — '))))
 
 
 if __name__ == '__main__':
