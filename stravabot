@@ -112,23 +112,37 @@ class StravaBot(object):
         )
 
         for x in data:
-            if not initial and x['id'] not in self.seen:
+            if not initial and self.get_id(x) not in self.seen:
                 # Allow time for activities to be renamed, etc.
                 eventlet.spawn_after(
                     self.latency,
                     lambda x: self.activity(self.GET(x)),
-                    '/activities/{}'.format(x['id']),
+                    '/activities/{}'.format(self.get_id(x)),
                 )
 
-            self.seen.add(x['id'])
+            self.seen.add(self.get_id(x))
+
+    def get_id(self, activity):
+        # The API dropped the "id" from the club activity field, so we generate
+        # one ourselves from some fields.
+
+        fields = (
+            'distance',
+            'moving_time',
+            'elapsed_time',
+            'workout_type',
+            'total_elevation_gain',
+        )
+
+        return '-'.join(repr(activity.get(x)) for x in fields)
 
     def activity(self, x):
         # Print activity once at most every X secs
-        if self.announced.get(x['id'], 0) >= time.time() - 1800:
+        if self.announced.get(self.get_id(x), 0) >= time.time() - 1800:
             return
 
-        self.seen.add(x['id'])
-        self.announced[x['id']] = time.time()
+        self.seen.add(self.get_id(x))
+        self.announced[self.get_id(x)] = time.time()
 
         m, s = divmod(x['moving_time'], 60)
         h, m = divmod(m, 60)
