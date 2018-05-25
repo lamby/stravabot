@@ -146,7 +146,7 @@ class StravaBot(object):
             inner.extend((
                 '{:,.1f}km'.format(x['distance'] / 1000),
                 '{:,.1f}km/h'.format(x['average_speed'] * 60 * 60 / 1000)
-                    if x['type'] == 'Ride' else '',
+                if x['type'] == 'Ride' else '',
                 '{total_elevation_gain:,.0f}m',
             ))
 
@@ -161,7 +161,7 @@ class StravaBot(object):
 
         outer = (
             u'\x0303{athlete[firstname]} {athlete[lastname]}\x0f: '
-                '\x02{name}\x0f',
+            '\x02{name}\x0f',
             fmt(inner, ', '),
             'https://app.strava.com/activities/{id}',
         )
