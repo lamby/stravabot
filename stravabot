@@ -3,7 +3,6 @@
 
 import re
 import sys
-import time
 import socket
 import eventlet
 import requests
@@ -27,7 +26,6 @@ class StravaBot(object):
 
         self.socket = socket.socket()
         self.seen = set()
-        self.announced = {}  # {activity_id: time.time}
 
     def run(self):
         eventlet.spawn(
@@ -82,14 +80,6 @@ class StravaBot(object):
     def cmd_PING(self, data):
         self.send('PONG {}'.format(data))
 
-    def cmd_PRIVMSG(self, data):
-        # Only messages on "our" channel
-        if not data.startswith('{}'.format(self.channel)):
-            return
-
-        for x in re_activity.findall(data):
-            self.activity(self.GET('/activities/{}'.format(x)))
-
     def GET(self, url, **params):
         params.setdefault('access_token', self.access_token)
 
@@ -112,30 +102,21 @@ class StravaBot(object):
         )
 
         for x in data:
-            if not initial and x['id'] not in self.seen:
-                # Allow time for activities to be renamed, etc.
-                eventlet.spawn_after(
-                    self.latency,
-                    lambda x: self.activity(self.GET(x)),
-                    '/activities/{}'.format(x['id']),
-                )
+            # Strava removed the 'id' field (#10)
+            key = '_'.join(str(x.get(y)) for y in (
+                'type',
+                'moving_time',
+                'elapsed_time',
+            ))
 
-            self.seen.add(x['id'])
+            if not initial and key not in self.seen:
+                self.announce(x)
 
-    def activity(self, x):
-        # Print activity once at most every X secs
-        if self.announced.get(x['id'], 0) >= time.time() - 1800:
-            return
+            self.seen.add(key)
 
-        self.seen.add(x['id'])
-        self.announced[x['id']] = time.time()
-
+    def announce(self, x):
         m, s = divmod(x['moving_time'], 60)
         h, m = divmod(m, 60)
-
-        # Some returned activities do not contain enough athlete data
-        if x['athlete']['resource_state'] == 1:
-            x['athlete'] = self.GET('/athletes/{}'.format(x['athlete']['id']))
 
         def fmt(ys, separator):
             return separator.join(y.strip().format(**x) for y in ys if y)
@@ -146,7 +127,7 @@ class StravaBot(object):
             inner.extend((
                 '{:,.1f}km'.format(x['distance'] / 1000),
                 '{:,.1f}km/h'.format(x['average_speed'] * 60 * 60 / 1000)
-                    if x['type'] == 'Ride' else '',
+                    if x['type'] == 'Ride' and 'average_speed' in x else '',
                 '{total_elevation_gain:,.0f}m',
             ))
 
@@ -163,7 +144,6 @@ class StravaBot(object):
             u'\x0303{athlete[firstname]} {athlete[lastname]}\x0f: '
                 '\x02{name}\x0f',
             fmt(inner, ', '),
-            'https://app.strava.com/activities/{id}',
         )
 
         self.send(u'NOTICE {} :{}'.format(self.channel, fmt(outer, u' — ')))
