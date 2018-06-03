@@ -3,6 +3,7 @@
 
 import re
 import sys
+import json
 import socket
 import eventlet
 import requests
@@ -103,11 +104,7 @@ class StravaBot(object):
 
         for x in data:
             # Strava removed the 'id' field (#10)
-            key = '_'.join(str(x.get(y)) for y in (
-                'type',
-                'moving_time',
-                'elapsed_time',
-            ))
+            key = hash(json.dumps(x, sort_keys=True))
 
             if not initial and key not in self.seen:
                 self.announce(x)
