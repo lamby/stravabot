@@ -147,6 +147,11 @@ class StravaBot(object):
     def generate_key(self, x):
         # Strava removed the 'id' field (#10)
 
+        # Allow some activity types to be renamed without rew-emitting
+        x = x.copy()
+        if x['type'] in ('Ride', 'Walk', 'Run'):
+            x.pop('name')
+
         return hash(json.dumps(x, sort_keys=True))
 
 
