@@ -103,8 +103,7 @@ class StravaBot(object):
         )
 
         for x in data:
-            # Strava removed the 'id' field (#10)
-            key = hash(json.dumps(x, sort_keys=True))
+            key = self.generate_key(x)
 
             if not initial and key not in self.seen:
                 self.announce(x)
@@ -144,6 +143,11 @@ class StravaBot(object):
         )
 
         self.send(u'NOTICE {} :{}'.format(self.channel, fmt(outer, u' — ')))
+
+    def generate_key(self, x):
+        # Strava removed the 'id' field (#10)
+
+        return hash(json.dumps(x, sort_keys=True))
 
 
 if __name__ == '__main__':
