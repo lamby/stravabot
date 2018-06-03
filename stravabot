@@ -31,7 +31,7 @@ class StravaBot(object):
         eventlet.spawn(
             backdoor.backdoor_server,
             eventlet.listen(('127.0.0.1', 3000)),
-            locals={'bot': self},
+            locals={'self': self},
         )
 
         # Stay connected
