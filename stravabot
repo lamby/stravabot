@@ -58,7 +58,7 @@ class StravaBot(object):
                 if not line:
                     continue
 
-                print "< {}".format(line)
+                print("< {}".format(line))
 
                 m = re_line.match(line.strip())
 
@@ -90,7 +90,7 @@ class StravaBot(object):
         ).json()
 
     def send(self, x):
-        print "> {}".format(x.encode('utf-8'))
+        print("> {}".format(x.encode('utf-8')))
         self.socket.send('{}\r\n'.format(x.encode('utf-8')))
 
     def poll(self, initial=False):
