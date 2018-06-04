@@ -149,6 +149,7 @@ class StravaBot(object):
 
         # Allow some activity types to be renamed without rew-emitting
         x = x.copy()
+        x.pop('workout_type')  # Not stable.
         if x['type'] in ('Ride', 'Walk', 'Run'):
             x.pop('name')
 
