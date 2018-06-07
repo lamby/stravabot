@@ -15,7 +15,8 @@ re_activity = re.compile(r'https?://(?:[^\.]+\.)?strava.com/activities/(\d+)')
 
 
 class StravaBot(object):
-    def __init__(self, server, port, nickname, channel, club_id, access_token, update_interval, latency):
+    def __init__(self, server, port, nickname, channel, club_id, access_token,
+                 update_interval, latency):
         self.server = server
         self.port = int(port)
         self.nickname = nickname
@@ -26,7 +27,7 @@ class StravaBot(object):
         self.latency = int(latency)
 
         self.socket = socket.socket()
-        self.seen = set()
+        self.by_ident = {}
 
     def run(self):
         eventlet.spawn(
@@ -66,7 +67,7 @@ class StravaBot(object):
                     continue
 
                 try:
-                    fn = getattr(self, 'cmd_{}'.format(m.group('cmd')))
+                    fn = getattr(self, 'cmd_{}'.format(m.group('cmd')).lower())
                 except AttributeError:
                     continue
 
@@ -78,16 +79,8 @@ class StravaBot(object):
         self.send('JOIN {}'.format(self.channel))
         self.poll(initial=True)
 
-    def cmd_PING(self, data):
+    def cmd_ping(self, data):
         self.send('PONG {}'.format(data))
-
-    def GET(self, url, **params):
-        params.setdefault('access_token', self.access_token)
-
-        return requests.get(
-            'https://www.strava.com/api/v3{}'.format(url),
-            params=params,
-        ).json()
 
     def send(self, x):
         print("> {}".format(x.encode('utf-8')))
@@ -96,64 +89,70 @@ class StravaBot(object):
     def poll(self, initial=False):
         eventlet.spawn_after(self.update_interval, self.poll)
 
-        data = self.GET(
-            '/clubs/{}/activities'.format(self.club_id),
-            # Prevent spam & deleting entries revealing old ones
-            per_page=200 if initial else 5,
+        url = 'https://www.strava.com/api/v3/clubs/{}/activities'.format(
+            self.club_id,
         )
 
-        for x in data:
-            key = self.generate_key(x)
+        response = requests.get(url, params={
+            # Prevent spam & deleting entries revealing old ones
+            'per_page': 200 if initial else 5,
+            'access_token': self.access_token,
+        })
 
-            if not initial and key not in self.seen:
-                self.announce(x)
+        for data in response.json():
+            activity = Activity(data)
+            ident = activity.get_ident()
 
-            self.seen.add(key)
+            if not initial and ident not in self.by_ident:
+                # Allow time for activities to be renamed/updated, etc.
+                eventlet.spawn_after(self.latency, self.announce, ident)
 
-    def announce(self, x):
+            # Always update local data so that it gets picked up after the
+            # latency window
+            self.by_ident[ident] = activity
+
+    def announce(self, ident):
+        activity = self.by_ident[ident]
+
+        self.send(u'NOTICE {} :{}'.format(self.channel, activity.get_text()))
+
+
+class Activity(object):
+    def __init__(self, data):
+        self.data = data
+
+    def get_ident(self):
+        # Strava removed the 'id' field (#10)
+
+        x = self.data.copy()
+        x.pop('workout_type', None)  # Not stable
+
+        if x.get('type', '') in ('Ride', 'Walk', 'Run'):
+            x.pop('name', None)
+
+        return hash(json.dumps(x, sort_keys=True))
+
+    def get_text(self):
+        x = self.data
+
         m, s = divmod(x['moving_time'], 60)
         h, m = divmod(m, 60)
+
+        inner = []
+        if x['distance'] > 100:
+            inner.append('{:,.1f}km'.format(x['distance'] / 1000))
+        inner.append('%s%02d:%02d' % (('%d:' % h if h else ''), m, s))
 
         def fmt(ys, separator):
             return separator.join(y.strip().format(**x) for y in ys if y)
 
-        inner = []
-
-        if x['distance'] > 100:
-            inner.extend((
-                '{:,.1f}km'.format(x['distance'] / 1000),
-                '{:,.1f}km/h'.format(x['average_speed'] * 60 * 60 / 1000)
-                    if x['type'] == 'Ride' and 'average_speed' in x else '',
-                '{total_elevation_gain:,.0f}m',
-            ))
-
-        if x.get('device_watts'):
-            inner.extend((
-                '{kilojoules:,.0f}kJ',
-                '{average_watts:,.0f}W AP',
-                '{weighted_average_watts:,.0f}W NP',
-            ))
-
-        inner.append('%s%02d:%02d' % (('%d:' % h if h else ''), m, s))
-
         outer = (
-            u'\x0303{athlete[firstname]} {athlete[lastname]}\x0f: '
-                '\x02{name}\x0f',
+            u'\x0303{athlete[firstname]} {athlete[lastname]}\x0f '
+            '\x02{name}\x0f',
             fmt(inner, ', '),
         )
 
-        self.send(u'NOTICE {} :{}'.format(self.channel, fmt(outer, u' — ')))
-
-    def generate_key(self, x):
-        # Strava removed the 'id' field (#10)
-
-        # Allow some activity types to be renamed without rew-emitting
-        x = x.copy()
-        x.pop('workout_type')  # Not stable.
-        if x['type'] in ('Ride', 'Walk', 'Run'):
-            x.pop('name')
-
-        return hash(json.dumps(x, sort_keys=True))
+        return fmt(outer, u' — ')
 
 
 if __name__ == '__main__':
