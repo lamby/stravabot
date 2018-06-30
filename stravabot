@@ -3,7 +3,6 @@
 
 import re
 import sys
-import json
 import socket
 import eventlet
 import requests
@@ -26,8 +25,8 @@ class StravaBot(object):
         self.update_interval = int(update_interval)
         self.latency = int(latency)
 
+        self.data = []
         self.socket = socket.socket()
-        self.by_ident = {}
 
     def run(self):
         eventlet.spawn(
@@ -94,47 +93,19 @@ class StravaBot(object):
         )
 
         response = requests.get(url, params={
-            # Prevent spam & deleting entries revealing old ones
-            'per_page': 200 if initial else 5,
+            'per_page': 10,
             'access_token': self.access_token,
         })
 
-        for data in response.json():
-            activity = Activity(data)
-            ident = activity.get_ident()
+        new_data = response.json()
 
-            if not initial and ident not in self.by_ident:
-                # Allow time for activities to be renamed/updated, etc.
-                eventlet.spawn_after(self.latency, self.announce, ident)
+        for x in new_data:
+            if not initial and x not in self.data:
+                self.announce(x)
 
-            # Always update local data so that it gets picked up after the
-            # latency window
-            self.by_ident[ident] = activity
+        self.data = new_data
 
-    def announce(self, ident):
-        activity = self.by_ident[ident]
-
-        self.send(u'NOTICE {} :{}'.format(self.channel, activity.get_text()))
-
-
-class Activity(object):
-    def __init__(self, data):
-        self.data = data
-
-    def get_ident(self):
-        # Strava removed the 'id' field (#10)
-
-        x = self.data.copy()
-        x.pop('workout_type', None)  # Not stable
-
-        if x.get('type', '') in ('Ride', 'Walk', 'Run'):
-            x.pop('name', None)
-
-        return hash(json.dumps(x, sort_keys=True))
-
-    def get_text(self):
-        x = self.data
-
+    def announce(self, x):
         m, s = divmod(x['moving_time'], 60)
         h, m = divmod(m, 60)
 
@@ -152,7 +123,7 @@ class Activity(object):
             fmt(inner, ', '),
         )
 
-        return fmt(outer, u' — ')
+        self.send(u'NOTICE {} :{}'.format(self.channel, fmt(outer, u' — ')))
 
 
 if __name__ == '__main__':
